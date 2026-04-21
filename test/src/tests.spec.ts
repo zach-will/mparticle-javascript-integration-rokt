@@ -3390,6 +3390,76 @@ describe('Rokt Forwarder', () => {
       expect(useCalls).toContain('ThankYouJourney');
     });
 
+    it('should fetch thank you element resource when thank you element extension is provided', async () => {
+      document.getElementById('rokt-thank-you-element')?.remove();
+      document.getElementById('rokt-launcher')?.remove();
+
+      (window as any).Rokt = undefined;
+      (window as any).mParticle.Rokt = {
+        attachKit: async (kit: any) => { (window as any).mParticle.Rokt.kit = kit; },
+        filters: {
+          userAttributesFilters: [],
+          filterUserAttributes: (attrs: any) => attrs,
+          filteredUser: { getMPID: () => '123' },
+        },
+        use: () => Promise.resolve(),
+      };
+
+      await (window as any).mParticle.forwarder.init(
+        {
+          accountId: '123456',
+          roktExtensions: '[{"jsmap":null,"map":null,"maptype":"LegacyExtension","value":"thank-you-journey"}]',
+        },
+        reportService.cb,
+        false,
+      );
+
+      const tyeScript = document.getElementById('rokt-thank-you-element') as HTMLScriptElement;
+      expect(tyeScript).not.toBeNull();
+      expect(tyeScript.src).toContain('/rokt-elements/rokt-element-thank-you.js');
+    });
+
+    it('should call mParticle.Rokt.use with ThankYouJourney when thank-you-journey extension is provided', async () => {
+      document.getElementById('rokt-thank-you-element')?.remove();
+      document.getElementById('rokt-launcher')?.remove();
+
+      const useCalls: string[] = [];
+
+      (window as any).Rokt = undefined;
+      (window as any).mParticle.Rokt = {
+        attachKit: async (kit: any) => { (window as any).mParticle.Rokt.kit = kit; },
+        filters: {
+          userAttributesFilters: [],
+          filterUserAttributes: (attrs: any) => attrs,
+          filteredUser: { getMPID: () => '123' },
+        },
+        use: (name: string) => {
+          useCalls.push(name);
+          return Promise.resolve();
+        },
+      };
+
+      await (window as any).mParticle.forwarder.init(
+        {
+          accountId: '123456',
+          roktExtensions: '[{"jsmap":null,"map":null,"maptype":"LegacyExtension","value":"thank-you-journey"}]',
+        },
+        reportService.cb,
+        false,
+      );
+
+      (window as any).Rokt = new (MockRoktForwarder as any)();
+      (window as any).Rokt.createLauncher = async () =>
+        Promise.resolve({ selectPlacements: () => {}, hashAttributes: () => {}, use: () => Promise.resolve() });
+
+      const launcherScript = document.getElementById('rokt-launcher') as HTMLScriptElement;
+      launcherScript.onload!(new Event('load'));
+
+      await waitForCondition(() => useCalls.length > 0);
+
+      expect(useCalls).toContain('ThankYouJourney');
+    });
+
     it('should handle invalid setting strings', () => {
       expect((window as any).mParticle.forwarder.testHelpers.extractRoktExtensionConfig('NONE')).toEqual({
         roktExtensionsQueryParams: [],
