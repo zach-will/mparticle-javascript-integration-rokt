@@ -336,9 +336,12 @@ function extractRoktExtensionConfig(settingsString?: string): RoktExtensionConfi
   };
 }
 
-function registerLegacyExtensions(legacyExtensions: string[]) {
+function registerLegacyExtensions(legacyExtensions: string[], launcher: RoktLauncher|null) {
+  if (!launcher) {
+    return;
+  }
   for (const extension of legacyExtensions) {
-    window.Rokt?.use(extension);
+    launcher.use(extension);
   }
 }
 
@@ -1107,7 +1110,7 @@ class RoktKit implements KitInterface {
         onLoad: () => {
           if (this.isLauncherReadyToAttach()) {
             this.attachLauncher(accountId, launcherOptions);
-            registerLegacyExtensions(legacyRoktExtensions);
+            registerLegacyExtensions(legacyRoktExtensions, this.launcher);
           } else {
             console.error('Rokt object is not available after script load.');
           }
