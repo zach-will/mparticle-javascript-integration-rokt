@@ -1033,11 +1033,9 @@ class RoktKit implements KitInterface {
     }
 
     const domain = mp().Rokt?.domain;
-    const {
-      roktExtensionsQueryParams,
-      legacyRoktExtensions,
-      loadThankYouElement,
-    } = extractRoktExtensionConfig(kitSettings.roktExtensions);
+    const { roktExtensionsQueryParams, legacyRoktExtensions, loadThankYouElement } = extractRoktExtensionConfig(
+      kitSettings.roktExtensions,
+    );
     const launcherOptions: Record<string, unknown> = {
       ...((mp().Rokt?.launcherOptions as Record<string, unknown>) || {}),
     };
@@ -1102,8 +1100,7 @@ class RoktKit implements KitInterface {
     }
 
     if (loadThankYouElement) {
-      loadRoktScript(
-        ROKT_THANK_YOU_ELEMENT_SCRIPT_ID, generateThankYouElementScript(domain));
+      loadRoktScript(ROKT_THANK_YOU_ELEMENT_SCRIPT_ID, generateThankYouElementScript(domain));
     }
 
     if (this.isLauncherReadyToAttach()) {

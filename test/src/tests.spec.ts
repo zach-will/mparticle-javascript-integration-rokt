@@ -3419,7 +3419,7 @@ describe('Rokt Forwarder', () => {
       expect(tyeScript.src).toContain('/rokt-elements/rokt-element-thank-you.js');
     });
 
-    it('should call mParticle.Rokt.use with ThankYouJourney when thank-you-journey extension is provided', async () => {
+    it('should call window.Rokt.use with ThankYouJourney when thank-you-journey extension is provided', async () => {
       document.getElementById('rokt-thank-you-element')?.remove();
       document.getElementById('rokt-launcher')?.remove();
 
@@ -3427,15 +3427,13 @@ describe('Rokt Forwarder', () => {
 
       (window as any).Rokt = undefined;
       (window as any).mParticle.Rokt = {
-        attachKit: async (kit: any) => { (window as any).mParticle.Rokt.kit = kit; },
+        attachKit: async (kit: any) => {
+          (window as any).mParticle.Rokt.kit = kit;
+        },
         filters: {
           userAttributesFilters: [],
           filterUserAttributes: (attrs: any) => attrs,
           filteredUser: { getMPID: () => '123' },
-        },
-        use: (name: string) => {
-          useCalls.push(name);
-          return Promise.resolve();
         },
       };
 
@@ -3449,6 +3447,9 @@ describe('Rokt Forwarder', () => {
       );
 
       (window as any).Rokt = new (MockRoktForwarder as any)();
+      (window as any).Rokt.use = (name: string) => {
+        useCalls.push(name);
+      };
       (window as any).Rokt.createLauncher = async () =>
         Promise.resolve({ selectPlacements: () => {}, hashAttributes: () => {}, use: () => Promise.resolve() });
 
