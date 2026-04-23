@@ -12,9 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "lib": ["DOM", "ESNext"],
     "declaration": true,
-    "skipLibCheck": true,
-    "types": ["vitest/globals"]
+    "skipLibCheck": true
   },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test"]
 }
