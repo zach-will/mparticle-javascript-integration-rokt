@@ -337,11 +337,10 @@ function extractRoktExtensionConfig(settingsString?: string): RoktExtensionConfi
 }
 
 function registerLegacyExtensions(legacyExtensions: string[], launcher: RoktLauncher|null) {
-  if (!launcher) {
-    return;
-  }
-  for (const extension of legacyExtensions) {
-    launcher.use(extension);
+  if (launcher) {
+    for (const extension of legacyExtensions) {
+      launcher.use(extension);
+    }
   }
 }
 

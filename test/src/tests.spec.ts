@@ -3348,11 +3348,16 @@ describe('Rokt Forwarder', () => {
       expect(tyeScript.src).toContain('/rokt-elements/rokt-element-thank-you.js');
     });
 
-    it('should call window.Rokt.use with ThankYouJourney when thank-you-journey extension is provided', async () => {
+    it('should call launcher.use with ThankYouJourney when thank-you-journey extension is provided', async () => {
       document.getElementById('rokt-thank-you-element')?.remove();
       document.getElementById('rokt-launcher')?.remove();
 
       const useCalls: string[] = [];
+      const mockLauncher = {
+        selectPlacements: () => {},
+        hashAttributes: () => {},
+        use: (name: string) => { useCalls.push(name); },
+      };
 
       (window as any).Rokt = undefined;
       (window as any).mParticle.Rokt = {
@@ -3375,17 +3380,17 @@ describe('Rokt Forwarder', () => {
         false,
       );
 
+      // Use a synchronous thenable so this.launcher is set before registerLegacyExtensions runs
       (window as any).Rokt = new (MockRoktForwarder as any)();
-      (window as any).Rokt.use = (name: string) => {
-        useCalls.push(name);
-      };
-      (window as any).Rokt.createLauncher = async () =>
-        Promise.resolve({ selectPlacements: () => {}, hashAttributes: () => {}, use: () => Promise.resolve() });
+      (window as any).Rokt.createLauncher = () => ({
+        then: (onFulfilled: (launcher: typeof mockLauncher) => void) => {
+          onFulfilled(mockLauncher);
+          return { catch: () => {} };
+        },
+      });
 
       const launcherScript = document.getElementById('rokt-launcher') as HTMLScriptElement;
       launcherScript.onload!(new Event('load'));
-
-      await waitForCondition(() => useCalls.length > 0);
 
       expect(useCalls).toContain('ThankYouJourney');
     });
